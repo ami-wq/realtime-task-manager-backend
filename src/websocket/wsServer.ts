@@ -12,6 +12,13 @@ function createWebSocketServer(server: http.Server) {
     ws.on("message", data => {
       let parsed: WSMessage;
 
+      ws.send(
+        JSON.stringify({
+          type: "welcome",
+          payload: "Connected to server",
+        }),
+      );
+
       try {
         parsed = JSON.parse(data.toString());
       } catch (_err) {
@@ -28,6 +35,30 @@ function createWebSocketServer(server: http.Server) {
       }
 
       console.log("[WS] Received:", parsed);
+
+      switch (parsed.type) {
+        case "ping":
+          console.log("[WS] Ping received");
+          break;
+
+        case "message":
+          console.log("[WS] Message received:", parsed.payload);
+          break;
+
+        default:
+          console.warn("[WS] Unknown event type:", parsed.type);
+
+          ws.send(
+            JSON.stringify({
+              type: "error",
+              payload: "Unknown event type",
+            }),
+          );
+      }
+    });
+
+    ws.on("close", () => {
+      console.log("[WS] Client disconnected");
     });
   });
 
