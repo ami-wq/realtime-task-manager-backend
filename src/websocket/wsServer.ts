@@ -38,11 +38,20 @@ function createWebSocketServer(server: http.Server) {
 
       switch (parsed.type) {
         case "ping":
-          console.log("[WS] Ping received");
+          ws.send(
+            JSON.stringify({
+              type: "pong",
+            }),
+          );
           break;
 
         case "message":
-          console.log("[WS] Message received:", parsed.payload);
+          ws.send(
+            JSON.stringify({
+              type: "echo",
+              payload: parsed.payload,
+            }),
+          );
           break;
 
         default:
