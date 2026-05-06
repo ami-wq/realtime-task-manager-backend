@@ -1,13 +1,24 @@
 import type http from "node:http";
-import { type WebSocket, WebSocketServer } from "ws";
+import { WebSocket, WebSocketServer } from "ws";
 
 import type { WSMessage } from "../types/ws";
 
 function createWebSocketServer(server: http.Server) {
   const wss = new WebSocketServer({ server });
+  const clients = new Set<WebSocket>();
 
   wss.on("connection", (ws: WebSocket) => {
     console.log("WebSocket connection established");
+
+    clients.add(ws);
+
+    function broadcast(data: string) {
+      clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(data);
+        }
+      });
+    }
 
     ws.on("message", data => {
       let parsed: WSMessage;
@@ -46,12 +57,13 @@ function createWebSocketServer(server: http.Server) {
           break;
 
         case "message":
-          ws.send(
+          broadcast(
             JSON.stringify({
-              type: "echo",
+              type: "message",
               payload: parsed.payload,
             }),
           );
+          console.log(`[WS] Broadcasting to ${clients.size} clients`);
           break;
 
         default:
@@ -68,6 +80,7 @@ function createWebSocketServer(server: http.Server) {
 
     ws.on("close", () => {
       console.log("[WS] Client disconnected");
+      clients.delete(ws);
     });
   });
 
