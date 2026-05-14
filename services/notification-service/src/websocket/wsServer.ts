@@ -1,7 +1,7 @@
 import type http from "node:http";
 import { WebSocket, WebSocketServer } from "ws";
 
-import type { WSMessage } from "../types/ws";
+import type { WSMessage } from "../../../../src/types/ws";
 
 function createWebSocketServer(server: http.Server) {
   const wss = new WebSocketServer({ server });

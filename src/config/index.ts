@@ -1,3 +1,0 @@
-export const config = {
-  port: process.env.PORT ? Number(process.env.PORT) : 5000,
-};

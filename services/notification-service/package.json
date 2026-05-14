@@ -1,7 +1,5 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "description": "",
+  "name": "notification-service",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,9 +9,6 @@
     "check": "biome check .",
     "format:fix": "biome format --write ."
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.6",
