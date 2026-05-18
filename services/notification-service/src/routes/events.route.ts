@@ -1,11 +1,9 @@
 import { Router } from "express";
 
+import { notifications } from "../store/notifications.store";
 import type { Event } from "../types/events";
-import type { Notification } from "../types/notification";
 
 const router = Router();
-
-const notifications: Notification[] = [];
 
 router.post("/events", (req, res) => {
   const event: Event = req.body;

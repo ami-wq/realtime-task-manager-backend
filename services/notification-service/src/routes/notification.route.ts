@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-const router = Router();
+import { notifications } from "../store/notifications.store";
 
-const notifications: Notification[] = [];
+const router = Router();
 
 router.get("/notifications", (_, res) => {
   res.json(notifications);
