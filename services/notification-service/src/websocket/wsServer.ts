@@ -3,22 +3,34 @@ import { WebSocket, WebSocketServer } from "ws";
 
 import type { WSMessage } from "../types/ws";
 
+const clients = new Set<WebSocket>();
+
+function broadcast(message: unknown) {
+  const data = JSON.stringify(message);
+
+  clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(data);
+    }
+  });
+
+  console.log(`[WS] Broadcasted to ${clients.size} clients`);
+}
+
 function createWebSocketServer(server: http.Server) {
   const wss = new WebSocketServer({ server });
-  const clients = new Set<WebSocket>();
 
   wss.on("connection", (ws: WebSocket) => {
     console.log("WebSocket connection established");
 
     clients.add(ws);
 
-    function broadcast(data: string) {
-      clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(data);
-        }
-      });
-    }
+    ws.send(
+      JSON.stringify({
+        type: "welcome",
+        payload: "Connected to notification service",
+      }),
+    );
 
     ws.on("message", data => {
       let parsed: WSMessage;
@@ -57,13 +69,10 @@ function createWebSocketServer(server: http.Server) {
           break;
 
         case "message":
-          broadcast(
-            JSON.stringify({
-              type: "message",
-              payload: parsed.payload,
-            }),
-          );
-          console.log(`[WS] Broadcasting to ${clients.size} clients`);
+          broadcast({
+            type: "message",
+            payload: parsed.payload,
+          });
           break;
 
         default:
@@ -82,9 +91,14 @@ function createWebSocketServer(server: http.Server) {
       console.log("[WS] Client disconnected");
       clients.delete(ws);
     });
+
+    ws.on("error", error => {
+      console.error("[WS] Error:", error);
+    });
   });
 
   return wss;
 }
 
 export default createWebSocketServer;
+export { broadcast };
